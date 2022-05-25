@@ -6,7 +6,7 @@ Check SSL validity, expiration, and status code for a list of hosts.
 ./ssl_checker.py --help
 usage: certval [-h] [-v] [-f FILE] [--no-color]
 
-certval CLI tool to test host SSL certificates validity.
+ssl-checker CLI tool to test host SSL certificates validity.
 
 options:
   -h, --help            show this help message and exit
@@ -43,6 +43,7 @@ From 'google.com' to 'github.com'.
 Expiration  Issuer                 Host
 2022-07-27  Google Trust Services LLC google.com
 2023-03-15  DigiCert Inc           github.com
+2023-01-23  DigiCert Inc           twitter.com
 ```
 
 Note that you can add comments in the hosts.txt file with a line starting with #.

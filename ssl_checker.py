@@ -139,7 +139,7 @@ def main():
     global COLORAMA_ENABLED
 
     parser = argparse.ArgumentParser(
-        prog="certval",
+        prog="ssl-checker",
         description="%(prog)s CLI tool to test host SSL certificates validity.",
     )
     parser.add_argument(
