@@ -19,7 +19,10 @@ options:
 git clone https://github.com/2O4/ssl_checker
 cd ssl_checker
 pip install -r requirements.txt
+cp hosts.txt.example hosts.txt
 ```
+
+Edit the `hosts.txt` file has needed.
 
 ## Usage
 
