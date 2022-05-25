@@ -24,6 +24,8 @@ except ImportError:
     print("to add colors to the output install colorama")
     print("run: pip install colorama")
 
+__version__ = "1.0.2"
+
 # Number of days before the date is flagged has 'soon' (yellow)
 CERT_EXPIRY_LIMIT = 15
 
@@ -37,7 +39,11 @@ BAD_CERT_ISSUERS = [
 GOOD_CERT_ISSUERS = [
     "Let's Encrypt",
     "Google Trust Services LLC",
+    "DigiCert Inc",
 ]
+
+EXPIRATION_SPACING = 11
+ISSUER_SPACING = 22
 
 
 def read_hosts(file):
@@ -86,19 +92,7 @@ def color_cert_issuer(cert_issuer):
         return Fore.RED
     elif cert_issuer in GOOD_CERT_ISSUERS:
         return Fore.GREEN
-    return None
-
-
-def get_host_status_code(host):
-    try:
-        status_code = requests.get(host).status_code
-    except requests.exceptions.SSLError:
-        status_code = "SSL ERROR"
-    except requests.exceptions.Timeout:
-        status_code = "TIMEOUT"
-    except Exception as e:
-        status_code = e
-    return status_code
+    return Fore.WHITE
 
 
 def color_status_code(status_code):
@@ -117,26 +111,20 @@ def color_status_code(status_code):
     return Fore.WHITE
 
 
-def print_host_status_code(host, message=None, spacing=12):
+def print_host_status_code(host):
     host = host.replace("http://", "")
     host = host.replace("https://", "")
-
-    if message is None:
-        message = host
-
-    https_status_code = get_host_status_code(f"https://{host}")
+    host = host.split("/")[0]
 
     x509 = get_certificate(host)
     cert_expiry_date = get_not_after_from_x509(x509)
     cert_issuer = get_issuer_from_x509(x509)[1][1].decode()
 
-    https_text = f"{str(https_status_code):{spacing}}"
     cert_date_text = cert_expiry_date.date() if cert_expiry_date else "-"
-    cert_date_text = f"{str(cert_date_text):{spacing}}"
-    cert_issuer_text = f"{str(cert_issuer):{spacing + 11}}"
+    cert_date_text = f"{str(cert_date_text):{EXPIRATION_SPACING}}"
+    cert_issuer_text = f"{str(cert_issuer):{ISSUER_SPACING}}"
 
     if COLORAMA_ENABLED:
-        https_text = f"{Fore.RESET}{color_status_code(https_status_code)}{https_text}"
         cert_date_text = (
             f"{Fore.RESET}{color_cert_date(cert_expiry_date)}{cert_date_text}"
         )
@@ -144,24 +132,27 @@ def print_host_status_code(host, message=None, spacing=12):
             f"{Fore.RESET}{color_cert_issuer(cert_issuer)}{cert_issuer_text}"
         )
 
-    print(f"{https_text} {cert_date_text} {cert_issuer_text} {message}")
+    print(f"{cert_date_text} {cert_issuer_text} {host}")
 
 
 def print_host_list(host_list):
-    SPACING = 12
-    print(
-        f"{'HTTP code':{SPACING}} {'SSL expiry':{SPACING}} {'Issuer':{SPACING + 11}} host"
-    )
+    print(f"{'Expiration':{EXPIRATION_SPACING}} {'Issuer':{ISSUER_SPACING}} Host")
     for host in host_list:
-        print_host_status_code(host, spacing=SPACING)
+        print_host_status_code(host)
 
 
 def main():
-    global HOST_LIST, API_HOST_LIST, SITES_HOST_LIST
+    global COLORAMA_ENABLED
 
     parser = argparse.ArgumentParser(
         prog="certval",
         description="%(prog)s CLI tool to test host SSL certificates validity.",
+    )
+    parser.add_argument(
+        "-v",
+        "--version",
+        help="Print version number.",
+        action="store_true",
     )
     parser.add_argument(
         "-f",
@@ -169,8 +160,20 @@ def main():
         help="A file containing a list of hosts to check, separated by new lines.",
         default="hosts.txt",
     )
+    parser.add_argument(
+        "--no-color",
+        help="Disable colored output.",
+        action="store_true",
+    )
 
     args = parser.parse_args()
+
+    if args.version:
+        print("ssl-checker version {}".format(__version__))
+        sys.exit(0)
+
+    if args.no_color:
+        COLORAMA_ENABLED = False
 
     try:
         host_list = read_hosts(args.file)
@@ -184,6 +187,7 @@ def main():
 
     print_start_message(host_list)
     print_host_list(host_list)
+    sys.exit(0)
 
 
 if __name__ == "__main__":
