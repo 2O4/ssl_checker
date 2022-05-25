@@ -8,21 +8,15 @@ from datetime import datetime, timedelta
 import OpenSSL
 
 try:
-    import requests
-except ImportError:
-    print("Lib requests is required to run this program.")
-    print("run: pip install requests")
-    sys.exit(1)
-
-try:
     from colorama import Fore, Style, init
 
     init(autoreset=True)
     COLORAMA_ENABLED = True
 except ImportError:
     COLORAMA_ENABLED = False
-    print("to add colors to the output install colorama")
+    print("To add colors to the output install colorama")
     print("run: pip install colorama")
+    print()
 
 __version__ = "1.0.2"
 
