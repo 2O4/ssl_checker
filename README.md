@@ -37,8 +37,8 @@ You need a file containing a list of hosts, by default the file is checked in th
 Output example:
 
 ```txt
-Checking SSL certificates for 2 hosts.
-From 'google.com' to 'github.com'.
+Checking SSL certificates for 3 hosts.
+From 'google.com' to 'twitter.com'.
 
 Expiration  Issuer                 Host
 2022-07-27  Google Trust Services LLC google.com
